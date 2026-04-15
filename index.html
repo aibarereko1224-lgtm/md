@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Moon Dust 月岩尘 | 影音阅读记录</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- 字体引入 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@300;400;500&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◇</text></svg>">
+  <meta name="description" content="Moon Dust - 一个诗意的影音阅读记录应用">
+</head>
+<body data-scene="forest" data-type="movie" data-view="grid" data-particle="true">
+  <!-- 全屏背景场景 -->
+  <div class="scene-backgrounds">
+    <div class="scene-bg active" data-scene="forest">
+      <div class="forest-gradient"></div>
+    </div>
+    <div class="scene-bg" data-scene="starry">
+      <div class="stars-layer"></div>
+      <div class="twinkling-stars"></div>
+    </div>
+    <div class="scene-bg" data-scene="stream">
+      <div class="stream-gradient"></div>
+      <div class="water-ripples"></div>
+    </div>
+    <div class="scene-bg" data-scene="desert">
+      <div class="desert-gradient"></div>
+    </div>
+  </div>
+
+  <!-- 黑卡纸噪点质感 -->
+  <div class="noise-overlay"></div>
+
+  <!-- 主容器 -->
+  <div class="main-container">
+    <!-- 头部 -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-title">MOON DUST</span>
+      </div>
+      <div class="header-right">
+        <!-- 场景切换按钮 -->
+        <button class="scene-btn active" data-scene="forest">Forest</button>
+        <button class="scene-btn" data-scene="starry">Starry</button>
+        <button class="scene-btn" data-scene="stream">Stream</button>
+        <button class="scene-btn" data-scene="desert">Desert</button>
+      </div>
+    </header>
+
+    <!-- 语录盲盒区域 -->
+    <section class="quote-section" id="quoteSection">
+      <div class="quote-content">
+        <blockquote class="main-quote" id="mainQuote"></blockquote>
+        <p class="quote-author" id="quoteAuthor"></p>
+        <div class="quote-divider"></div>
+      </div>
+
+      <!-- 极简录入 UI -->
+      <div class="entry-container">
+        <div class="entry-card glass-card">
+          <div class="type-toggle">
+            <button class="type-btn active" data-type="movie">Movie</button>
+            <button class="type-btn" data-type="tv">TV</button>
+            <button class="type-btn" data-type="book">Book</button>
+          </div>
+
+          <div class="search-wrapper">
+            <input type="text" class="search-input" id="searchInput" placeholder="记录今天的观看或阅读...">
+            <button class="search-btn" id="searchBtn">Search</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 库入口 (更明显) -->
+    <section class="library-entrance" id="libraryEntrance">
+      <button class="library-btn" id="openLibraryBtn">
+        <span class="library-btn-icon">◇</span>
+        <span class="library-btn-text">我的库</span>
+        <span class="library-btn-count" id="libraryCount">0</span>
+      </button>
+    </section>
+  </div>
+
+  <!-- 弹窗层 -->
+  <div class="modal-layer" id="modalLayer">
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- 海报选择弹窗 -->
+    <div class="poster-modal glass-panel" id="posterModal">
+      <div class="poster-modal-header">
+        <h3 class="poster-modal-title" id="posterModalTitle">选择作品</h3>
+        <button class="modal-close-btn" id="posterModalClose">×</button>
+      </div>
+      <div class="poster-modal-body">
+        <div class="poster-grid" id="posterGrid"></div>
+        <!-- 没找到？自己上传 -->
+        <div class="poster-upload-option" id="posterUploadOption">
+          <button class="upload-own-btn" id="uploadOwnBtn">
+            <span class="upload-own-icon">+</span>
+            <span>没找到？自己上传</span>
+          </button>
+        </div>
+      </div>
+      <div class="poster-modal-loading" id="posterLoading">
+        <div class="loading-spinner"></div>
+        <span>搜索中...</span>
+      </div>
+    </div>
+
+    <!-- 评价撰写弹窗 -->
+    <div class="review-modal glass-panel" id="reviewModal">
+      <button class="modal-close-btn review-close-btn" id="reviewModalClose">×</button>
+      <div class="review-modal-content">
+        <div class="review-poster-section">
+          <img src="" alt="" id="reviewPosterImg" class="review-poster-img">
+          <label class="upload-poster-btn" id="uploadPosterBtn">
+            <input type="file" id="posterUploadInput" accept="image/*" hidden>
+            <span class="upload-icon">+</span>
+            <span class="upload-text">上传封面</span>
+          </label>
+        </div>
+        <div class="review-form-section">
+          <input type="text" class="review-title-input" id="reviewItemTitle" placeholder="作品名称">
+          <input type="text" class="review-year-input" id="reviewItemYear" placeholder="年份 (选填)">
+          <div class="review-rating-section">
+            <div class="star-rating" id="reviewRating">
+              <span class="star" data-rating="1">★</span>
+              <span class="star" data-rating="2">★</span>
+              <span class="star active" data-rating="3">★</span>
+              <span class="star" data-rating="4">★</span>
+              <span class="star" data-rating="5">★</span>
+            </div>
+          </div>
+          <div class="review-textarea-section">
+            <textarea class="review-textarea" id="reviewTextarea" placeholder="记录你靠近的宇宙..."></textarea>
+          </div>
+          <div class="review-actions">
+            <button class="review-action-btn abandon" id="abandonBtn">放弃</button>
+            <button class="review-action-btn save-later" id="saveLaterBtn">先入库稍后写</button>
+            <button class="review-action-btn root-btn" id="saveNowBtn">Root</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库弹窗 -->
+    <div class="library-modal glass-panel" id="libraryModal">
+      <div class="library-modal-header">
+        <div class="library-header-left">
+          <h3 class="library-modal-title" id="libraryModalTitle">我的库</h3>
+          <span class="library-record-count" id="libraryRecordCount">0 条记录</span>
+        </div>
+        <div class="library-header-right">
+          <button class="library-action-btn" id="statsBtn" title="数据统计">
+            <span class="stats-icon">📊</span>
+          </button>
+          <button class="library-action-btn" id="viewToggleBtn" title="切换视图">
+            <span class="view-icon">⊞</span>
+          </button>
+          <button class="library-action-btn" id="particleToggleBtn" title="粒子开关">
+            <span class="particle-icon">◆</span>
+          </button>
+          <button class="library-action-btn" id="exportBtn" title="导出卡片">
+            <span class="export-icon">✧</span>
+          </button>
+          <button class="modal-close-btn" id="libraryModalClose">×</button>
+        </div>
+      </div>
+      <div class="library-modal-body">
+        <!-- 筛选区域 -->
+        <div class="library-filters" id="libraryFilters"></div>
+        <!-- 记录列表 -->
+        <div id="libraryModalBody"></div>
+      </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="detail-modal glass-panel" id="detailModal">
+      <button class="modal-close-btn detail-close-btn" id="detailModalClose">×</button>
+      <div class="detail-modal-content">
+        <div class="detail-poster-section">
+          <img src="" alt="" id="detailPosterImg" class="detail-poster-img">
+        </div>
+        <div class="detail-info-section">
+          <h3 class="detail-title" id="detailTitle"></h3>
+          <p class="detail-meta" id="detailMeta"></p>
+          <div class="detail-rating" id="detailRating"></div>
+          <div class="detail-comment-section">
+            <p class="detail-comment" id="detailComment"></p>
+          </div>
+          <div class="detail-actions">
+            <button class="detail-action-btn" id="editRecordBtn">编辑</button>
+            <button class="detail-action-btn" id="exportCardBtn">导出</button>
+            <button class="detail-action-btn delete" id="deleteRecordBtn">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑弹窗（复用评价弹窗） -->
+  </div>
+
+  <script src="app.bundle.js"></script>
+</body>
+</html>
