@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Moon Dust 月岩尘 | 影音阅读记录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@300;400;500&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◇</text></svg>">
+  <meta name="description" content="Moon Dust - 一个诗意的影音阅读记录应用">
+  <style>
+/* CSS Variables */
+:root {
+  --bg-primary: #121212;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --text-primary: #E8E8E8;
+  --text-secondary: #8A8A8A;
+  --accent: #C9A87C;
+
+  --glass-bg: rgba(20, 20, 28, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  --font-serif: 'Noto Serif SC', 'PT Serif', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --z-modal: 1000;
+  --z-buttons: 1010;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: var(--font-serif);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+.scene-backgrounds {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.scene-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+}
+
+.scene-bg.active {
+  opacity: 1;
+}
+
+.scene-bg[data-scene="forest"] {
+  background-image: linear-gradient(160deg, rgba(13, 31, 18, 0.85), rgba(26, 58, 31, 0.7), rgba(45, 90, 61, 0.6)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80');
+}
+
+.scene-bg[data-scene="starry"] {
+  background-image: linear-gradient(180deg, rgba(5, 5, 16, 0.7), rgba(10, 10, 32, 0.6), rgba(15, 15, 37, 0.5)), url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80');
+}
+
+.stars-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 5% 10%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 15% 25%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(2px 2px at 25% 5%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 35% 35%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 45% 15%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(2px 2px at 55% 45%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 65% 25%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 75% 55%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(2px 2px at 85% 35%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 95% 65%, rgba(255, 255, 255, 0.7), transparent);
+}
+
+.twinkling-stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.scene-bg[data-scene="stream"] {
+  background-image: linear-gradient(180deg, rgba(10, 21, 32, 0.75), rgba(21, 37, 53, 0.65), rgba(26, 53, 69, 0.55)), url('https://images.unsplash.com/photo-1501756741507-18b76cd29a65?w=1920&q=80');
+}
+
+.scene-bg[data-scene="desert"] {
+  background-image: linear-gradient(180deg, rgba(26, 26, 26, 0.8), rgba(42, 37, 32, 0.7), rgba(58, 48, 37, 0.6)), url('https://images.unsplash.com/photo-1509316785289-025f3ee8679a?w=1920&q=80');
+}
+
+.main-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 32px 20px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.header-right {
+  display: flex;
+  gap: 8px;
+}
+
+.scene-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.scene-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.scene-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.quote-section {
+  text-align: center;
+  padding: 40px 0;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px); }
+}
+
+.quote-content {
+  margin-bottom: 40px;
+}
+
+.main-quote {
+  font-family: var(--font-serif);
+  font-size: clamp(16px, 4vw, 24px);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.6;
+  color: #ffffff;
+  margin-bottom: 12px;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 0, 0, 0.6);
+}
+
+.quote-author {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+}
+
+.quote-divider {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 124, 0.6), transparent);
+  margin: 20px auto 0;
+}
+
+.entry-container {
+  max-width: 480px;
+  margin: 0 auto 40px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.2s forwards;
+}
+
+.glass-card {
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.type-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.type-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.type-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 14px;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.search-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.search-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.library-entrance {
+  text-align: center;
+  padding: 20px 0;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.4s forwards;
+}
+
+.library-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+}
+
+.library-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(201, 168, 124, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.library-btn-icon {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.library-btn-text {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.library-btn-count {
+  background: var(--accent);
+  color: #0a0a0f;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.modal-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-modal);
+  display: none;
+  pointer-events: none;
+}
+
+.modal-layer.active {
+  display: block;
+  pointer-events: auto;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-panel {
+  position: absolute;
+  background: rgba(15, 15, 20, 0.92);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95) translateY(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+}
+
+.poster-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(92vw, 800px);
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+.poster-modal.active {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.poster-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.poster-modal-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.poster-modal-body {
+  padding: 16px 20px;
+  max-height: calc(85vh - 80px);
+  overflow-y: auto;
+}
+
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.poster-item {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 2/3;
+  transition: all var(--transition-medium);
+}
+
+.poster-item:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.poster-item:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(201, 168, 124, 0.6);
+  border-radius: 8px;
+}
+
+.poster-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.poster-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.poster-item-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 6px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.poster-item:hover .poster-item-info {
+  opacity: 1;
+}
+
+.poster-item-title {
+  font-size: 10px;
+  color: #fff;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.poster-upload-option {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.upload-own-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upload-own-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(201, 168, 124, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.upload-own-icon {
+  font-size: 18px;
+}
+
+.poster-modal.loading .poster-modal-body {
+  opacity: 0.3;
+}
+
+.poster-modal.loading .poster-modal-loading {
+  display: flex;
+}
+
+.poster-modal-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(201, 168, 124, 0.8);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.poster-modal-loading span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.review-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(94vw, 700px);
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.review-modal.active {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.review-modal-content {
+  display: flex;
+  min-height: 400px;
+}
+
+.review-poster-section {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-poster-img {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  border-radius: 16px 0 0 16px;
+  min-height: 280px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.upload-poster-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upload-poster-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(201, 168, 124, 0.5);
+}
+
+.upload-icon {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.upload-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.review-form-section {
+  flex: 1;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-title-input,
+.review-year-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.review-title-input {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.review-year-input {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.review-title-input::placeholder,
+.review-year-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.review-rating-section {
+  margin-bottom: 16px;
+}
+
+.star-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.star-rating .star {
+  font-size: 22px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.15s ease;
+}
+
+.star-rating .star:hover,
+.star-rating .star.active {
+  color: var(--accent);
+  transform: scale(1.15);
+}
+
+.review-textarea-section {
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+.review-textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-primary);
+  resize: none;
+  outline: none;
+}
+
+.review-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.review-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  position: relative;
+  z-index: var(--z-buttons);
+}
+
+.review-action-btn {
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  z-index: var(--z-buttons);
+  pointer-events: auto;
+}
+
+.review-action-btn.abandon {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.review-action-btn.abandon:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.review-action-btn.save-later {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.review-action-btn.save-later:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.review-action-btn.root-btn {
+  background: rgba(201, 168, 124, 0.9);
+  border: 1px solid var(--accent);
+  color: #0a0a0f;
+  font-weight: 500;
+}
+
+.review-action-btn.root-btn:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 168, 124, 0.4);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: var(--z-buttons);
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.review-close-btn {
+  top: 16px;
+  right: 16px;
+}
+
+.library-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(95vw, 1100px);
+  max-height: 88vh;
+  overflow: hidden;
+}
+
+.library-modal.active {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.library-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.library-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.library-modal-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.library-record-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.library-header-right {
+  display: flex;
+  gap: 8px;
+}
+
+.library-action-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+.library-action-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.library-action-btn.active {
+  background: rgba(201, 168, 124, 0.15);
+  border-color: rgba(201, 168, 124, 0.5);
+  color: var(--accent);
+}
+
+.library-modal-body {
+  padding: 20px;
+  max-height: calc(88vh - 70px);
+  overflow-y: auto;
+}
+
+[data-season="spring"] { --season-color: #7CB68E; }
+[data-season="summer"] { --season-color: #6B9ACA; }
+[data-season="autumn"] { --season-color: #C9A87C; }
+[data-season="winter"] { --season-color: #9BA8B8; }
+
+.library-group {
+  margin-bottom: 32px;
+}
+
+.library-group-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--season-color, var(--accent));
+  margin-bottom: 16px;
+  padding-left: 8px;
+  border-left: 2px solid var(--season-color, var(--accent));
+}
+
+.library-records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.library-records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.library-record {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.library-record:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.library-record-list {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.library-record-poster {
+  width: 70px;
+  height: 105px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.library-record-grid {
+  aspect-ratio: 2/3;
+}
+
+.library-record-grid .library-record-poster {
+  width: 100%;
+  height: 100%;
+}
+
+.library-record-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.library-record-title {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-record-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.library-record-rating {
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.library-record-rating .empty {
+  opacity: 0.3;
+}
+
+.record-particle-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.record-particle-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 15, 0.95);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.record-particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.record-comment {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-primary);
+  padding: 12px 16px;
+  position: relative;
+  z-index: 0;
+}
+
+.record-comment.empty {
+  font-style: italic;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+[data-particle="false"] .record-particle-bg,
+[data-particle="false"] .record-particle-canvas {
+  display: none;
+}
+
+.library-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.library-empty-icon {
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.15);
+  margin-bottom: 16px;
+}
+
+.library-empty-text {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detail-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(95vw, 900px);
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.detail-modal.active {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.detail-modal-content {
+  display: flex;
+  min-height: 450px;
+}
+
+.detail-poster-section {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.detail-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px 0 0 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.detail-info-section {
+  flex: 1;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.detail-meta {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 16px;
+}
+
+.detail-rating {
+  font-size: 18px;
+  color: var(--accent);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.detail-rating .empty {
+  opacity: 0.3;
+}
+
+.detail-comment-section {
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.detail-comment {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  white-space: pre-wrap;
+}
+
+.detail-comment.empty {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-action-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.detail-action-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-action-btn.delete {
+  border-color: rgba(255, 100, 100, 0.3);
+  color: rgba(255, 100, 100, 0.7);
+}
+
+.detail-action-btn.delete:hover {
+  background: rgba(255, 100, 100, 0.1);
+  border-color: rgba(255, 100, 100, 0.5);
+  color: rgba(255, 100, 100, 1);
+}
+
+.detail-close-btn {
+  top: 16px;
+  right: 16px;
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 20px 16px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-right {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .scene-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .main-quote {
+    font-size: 16px;
+  }
+
+  .type-toggle {
+    gap: 6px;
+  }
+
+  .type-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .poster-modal,
+  .review-modal,
+  .library-modal,
+  .detail-modal {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+  }
+
+  .poster-modal.active,
+  .review-modal.active,
+  .library-modal.active,
+  .detail-modal.active {
+    transform: translateY(0);
+  }
+
+  .review-modal-content,
+  .detail-modal-content {
+    flex-direction: column;
+  }
+
+  .review-poster-section {
+    width: 100%;
+    height: 160px;
+    flex-direction: row;
+  }
+
+  .review-poster-img {
+    border-radius: 12px 12px 0 0;
+    min-height: auto;
+  }
+
+  .detail-poster-section {
+    width: 100%;
+    height: 200px;
+  }
+
+  .detail-poster-img {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .detail-info-section {
+    padding: 20px;
+  }
+
+  .detail-title {
+    font-size: 20px;
+  }
+
+  .review-form-section {
+    padding: 16px;
+  }
+
+  .review-title-input {
+    font-size: 16px;
+  }
+
+  .review-actions {
+    flex-wrap: wrap;
+  }
+
+  .review-action-btn {
+    flex: 1;
+    min-width: calc(50% - 5px);
+    text-align: center;
+  }
+
+  .library-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .library-records-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .library-records-list .library-record-list {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .library-record-poster {
+    width: 80px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scene-btn {
+    padding: 5px 8px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .search-wrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-btn {
+    width: 100%;
+  }
+
+  .poster-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .review-action-btn {
+    width: 100%;
+  }
+
+  .upload-poster-btn {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .poster-item:hover::after {
+    display: none;
+  }
+
+  .poster-item:active {
+    transform: scale(0.98);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::selection {
+  background: rgba(201, 168, 124, 0.3);
+}
+  </style>
+</head>
+<body data-scene="forest" data-type="movie" data-view="grid" data-particle="true">
+  <div class="scene-backgrounds">
+    <div class="scene-bg active" data-scene="forest">
+      <div class="forest-gradient"></div>
+    </div>
+    <div class="scene-bg" data-scene="starry">
+      <div class="stars-layer"></div>
+      <div class="twinkling-stars"></div>
+    </div>
+    <div class="scene-bg" data-scene="stream">
+      <div class="stream-gradient"></div>
+      <div class="water-ripples"></div>
+    </div>
+    <div class="scene-bg" data-scene="desert">
+      <div class="desert-gradient"></div>
+    </div>
+  </div>
+
+  <div class="noise-overlay"></div>
+
+  <div class="main-container">
+    <header class="app-header">
+      <div class="header-left">
+        <span class="app-title">MOON DUST</span>
+      </div>
+      <div class="header-right">
+        <button class="scene-btn active" data-scene="forest">Forest</button>
+        <button class="scene-btn" data-scene="starry">Starry</button>
+        <button class="scene-btn" data-scene="stream">Stream</button>
+        <button class="scene-btn" data-scene="desert">Desert</button>
+      </div>
+    </header>
+
+    <section class="quote-section" id="quoteSection">
+      <div class="quote-content">
+        <blockquote class="main-quote" id="mainQuote"></blockquote>
+        <p class="quote-author" id="quoteAuthor"></p>
+        <div class="quote-divider"></div>
+      </div>
+
+      <div class="entry-container">
+        <div class="glass-card">
+          <div class="type-toggle">
+            <button class="type-btn active" data-type="movie">Movie</button>
+            <button class="type-btn" data-type="tv">TV</button>
+            <button class="type-btn" data-type="book">Book</button>
+          </div>
+
+          <div class="search-wrapper">
+            <input type="text" class="search-input" id="searchInput" placeholder="记录今天的观看或阅读...">
+            <button class="search-btn" id="searchBtn">Search</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="library-entrance" id="libraryEntrance">
+      <button class="library-btn" id="openLibraryBtn">
+        <span class="library-btn-icon">◇</span>
+        <span class="library-btn-text">我的库</span>
+        <span class="library-btn-count" id="libraryCount">0</span>
+      </button>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="modalLayer">
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <div class="poster-modal glass-panel" id="posterModal">
+      <div class="poster-modal-header">
+        <h3 class="poster-modal-title" id="posterModalTitle">选择作品</h3>
+        <button class="modal-close-btn" id="posterModalClose">×</button>
+      </div>
+      <div class="poster-modal-body">
+        <div class="poster-grid" id="posterGrid"></div>
+        <div class="poster-upload-option" id="posterUploadOption">
+          <button class="upload-own-btn" id="uploadOwnBtn">
+            <span class="upload-own-icon">+</span>
+            <span>没找到？自己上传</span>
+          </button>
+        </div>
+      </div>
+      <div class="poster-modal-loading" id="posterLoading">
+        <div class="loading-spinner"></div>
+        <span>搜索中...</span>
+      </div>
+    </div>
+
+    <div class="review-modal glass-panel" id="reviewModal">
+      <button class="modal-close-btn review-close-btn" id="reviewModalClose">×</button>
+      <div class="review-modal-content">
+        <div class="review-poster-section">
+          <img src="" alt="" id="reviewPosterImg" class="review-poster-img">
+          <label class="upload-poster-btn" id="uploadPosterBtn">
+            <input type="file" id="posterUploadInput" accept="image/*" hidden>
+            <span class="upload-icon">+</span>
+            <span class="upload-text">上传封面</span>
+          </label>
+        </div>
+        <div class="review-form-section">
+          <input type="text" class="review-title-input" id="reviewItemTitle" placeholder="作品名称">
+          <input type="text" class="review-year-input" id="reviewItemYear" placeholder="年份 (选填)">
+          <div class="review-rating-section">
+            <div class="star-rating" id="reviewRating">
+              <span class="star" data-rating="1">★</span>
+              <span class="star" data-rating="2">★</span>
+              <span class="star active" data-rating="3">★</span>
+              <span class="star" data-rating="4">★</span>
+              <span class="star" data-rating="5">★</span>
+            </div>
+          </div>
+          <div class="review-textarea-section">
+            <textarea class="review-textarea" id="reviewTextarea" placeholder="记录你靠近的宇宙..."></textarea>
+          </div>
+          <div class="review-actions">
+            <button class="review-action-btn abandon" id="abandonBtn">放弃</button>
+            <button class="review-action-btn save-later" id="saveLaterBtn">先入库稍后写</button>
+            <button class="review-action-btn root-btn" id="saveNowBtn">Root</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="library-modal glass-panel" id="libraryModal">
+      <div class="library-modal-header">
+        <div class="library-header-left">
+          <h3 class="library-modal-title" id="libraryModalTitle">我的库</h3>
+          <span class="library-record-count" id="libraryRecordCount">0 条记录</span>
+        </div>
+        <div class="library-header-right">
+          <button class="library-action-btn" id="viewToggleBtn" title="切换视图">
+            <span class="view-icon">⊞</span>
+          </button>
+          <button class="library-action-btn" id="particleToggleBtn" title="粒子开关">
+            <span class="particle-icon">◆</span>
+          </button>
+          <button class="library-action-btn" id="exportBtn" title="导出卡片">
+            <span class="export-icon">✧</span>
+          </button>
+          <button class="modal-close-btn" id="libraryModalClose">×</button>
+        </div>
+      </div>
+      <div class="library-modal-body" id="libraryModalBody"></div>
+    </div>
+
+    <div class="detail-modal glass-panel" id="detailModal">
+      <button class="modal-close-btn detail-close-btn" id="detailModalClose">×</button>
+      <div class="detail-modal-content">
+        <div class="detail-poster-section">
+          <img src="" alt="" id="detailPosterImg" class="detail-poster-img">
+        </div>
+        <div class="detail-info-section">
+          <h3 class="detail-title" id="detailTitle"></h3>
+          <p class="detail-meta" id="detailMeta"></p>
+          <div class="detail-rating" id="detailRating"></div>
+          <div class="detail-comment-section">
+            <p class="detail-comment" id="detailComment"></p>
+          </div>
+          <div class="detail-actions">
+            <button class="detail-action-btn" id="editRecordBtn">编辑</button>
+            <button class="detail-action-btn" id="exportCardBtn">导出</button>
+            <button class="detail-action-btn delete" id="deleteRecordBtn">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const CONFIG = {
+  TMDB_API_KEY: '926f2381b83c386e92035f2940e15540',
+  TMDB_BASE_URL: 'https://api.themoviedb.org/3',
+  TMDB_IMAGE_BASE: 'https://image.tmdb.org/t/p/w500',
+  GOOGLE_BOOKS_URL: 'https://www.googleapis.com/books/v1/volumes',
+  STORAGE_KEY: 'moondust_records',
+  PARTICLE_DENSITY: 150,
+  PARTICLE_SIZE: 1.2
+};
+
+const quotes = [
+  { text: "我们阅读以知道我们并不孤独。", author: "林奕含" },
+  { text: "忍耐是美德,可我却无法不怀疑。", author: "林奕含" },
+  { text: "我已经知道,爱情是最甜美的复仇。", author: "林奕含" },
+  { text: "写作是一种反抗。", author: "Annie Ernaux" },
+  { text: "生命不是安排,而是追求,是人的意义追寻过程。", author: "Joan Didion" },
+  { text: "一个人能使自己成为自己,比什么都重要。", author: "Virginia Woolf" },
+  { text: "如果有一件事是好且是对的,那就去做。", author: "李娟" },
+  { text: "我的朋友是生活本身。", author: "李娟" },
+  { text: "世界就在手边,躺倒就是睡眠。", author: "李娟" },
+  { text: "岁月极美,在于它必然的流逝。春花，秋月、夏日、冬雪。", author: "三毛" },
+  { text: "每想你一次,天上飘落一粒沙,从此形成了撒哈拉。", author: "三毛" },
+  { text: "一个人至少拥有一个梦想,有一个理由去坚强。", author: "三毛" },
+  { text: "生命有它的图案,我们惟有临摹。", author: "张爱玲" },
+  { text: "因为懂得,所以慈悲。", author: "张爱玲" },
+  { text: "你年轻么?不要紧,过两年就老了。", author: "张爱玲" },
+  { text: "We write to taste life twice, in the moment and in retrospect.", author: "Anaïs Nin" },
+  { text: "I am not afraid of storms, for I am learning how to sail my ship.", author: "Louisa May Alcott" },
+  { text: "The things we fear most have nothing to do with darkness.", author: "Susanna Clarke" },
+  { text: "Stay gold, Ponyboy. Stay gold.", author: "S.E. Hinton" },
+  { text: "I am not a has-been. I am a will-be.", author: "Lauren Bacall" },
+  { text: "The most common way people give up their power is by thinking they don't have any.", author: "Alice Walker" }
+];
+
+const Storage = {
+  getRecords() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)) || [];
+    } catch { return []; }
+  },
+  saveRecords(records) {
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(records));
+  },
+  addRecord(record) {
+    const records = this.getRecords();
+    records.unshift(record);
+    this.saveRecords(records);
+    return records;
+  },
+  generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+};
+
+function getSeason(date = new Date()) {
+  const month = date.getMonth();
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'autumn';
+  return 'winter';
+}
+
+function getSeasonName(season) {
+  return { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' }[season];
+}
+
+function getMonthName(month) {
+  return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][month];
+}
+
+const TMDBService = {
+  async searchMovies(query) {
+    const res = await fetch(`${CONFIG.TMDB_BASE_URL}/search/movie?api_key=${CONFIG.TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=zh-TW`);
+    const data = await res.json();
+    return data.results || [];
+  },
+  async searchTV(query) {
+    const res = await fetch(`${CONFIG.TMDB_BASE_URL}/search/tv?api_key=${CONFIG.TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=zh-TW`);
+    const data = await res.json();
+    return data.results || [];
+  },
+  getPosterUrl(path) {
+    return path ? CONFIG.TMDB_IMAGE_BASE + path : null;
+  }
+};
+
+const GoogleBooksService = {
+  async search(query) {
+    const res = await fetch(`${CONFIG.GOOGLE_BOOKS_URL}?q=${encodeURIComponent(query)}&maxResults=20`);
+    const data = await res.json();
+    return data.items || [];
+  },
+  getCoverUrl(info) {
+    return info?.imageLinks?.thumbnail || info?.imageLinks?.smallThumbnail || null;
+  }
+};
+
+const State = {
+  currentType: 'movie',
+  searchResults: [],
+  selectedItem: null,
+  selectedRating: 3,
+  customPoster: null,
+  viewMode: 'grid',
+  particleEnabled: true,
+  editingId: null
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  State.viewMode = localStorage.getItem('moondust_view') || 'grid';
+  State.particleEnabled = localStorage.getItem('moondust_particle') !== 'false';
+  document.body.dataset.view = State.viewMode;
+  document.body.dataset.particle = State.particleEnabled;
+
+  displayRandomQuote();
+  initSceneSwitcher();
+  initTypeToggle();
+  initSearch();
+  initStarRating();
+  initReviewActions();
+  initModalCloseEvents();
+  initLibraryButton();
+  initPosterUpload();
+  initUploadOwn();
+  initViewToggle();
+  initParticleToggle();
+  updateLibraryCount();
+});
+
+function initSceneSwitcher() {
+  const btns = document.querySelectorAll('.scene-btn');
+  const bgs = document.querySelectorAll('.scene-bg');
+  btns.forEach(btn => {
+    btn.onclick = () => {
+      const scene = btn.dataset.scene;
+      document.body.dataset.scene = scene;
+      bgs.forEach(bg => bg.classList.toggle('active', bg.dataset.scene === scene));
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
+}
+
+function initTypeToggle() {
+  const btns = document.querySelectorAll('.type-btn');
+  btns.forEach(btn => {
+    btn.onclick = () => {
+      State.currentType = btn.dataset.type;
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
+}
+
+async function performSearch() {
+  const query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+
+  showPosterModal();
+  showLoading();
+
+  try {
+    let results = [];
+    if (State.currentType === 'book') {
+      const items = await GoogleBooksService.search(query);
+      results = items.map(i => ({
+        id: i.id, type: 'book', title: i.volumeInfo.title || 'Unknown',
+        year: i.volumeInfo.publishedDate?.substr(0, 4) || '',
+        poster: GoogleBooksService.getCoverUrl(i.volumeInfo)
+      }));
+    } else if (State.currentType === 'movie') {
+      const movies = await TMDBService.searchMovies(query);
+      results = movies.map(m => ({
+        id: String(m.id), type: 'movie', title: m.title || 'Unknown',
+        year: (m.release_date || '').substr(0, 4),
+        poster: TMDBService.getPosterUrl(m.poster_path)
+      }));
+    } else {
+      const shows = await TMDBService.searchTV(query);
+      results = shows.map(s => ({
+        id: String(s.id), type: 'tv', title: s.name || 'Unknown',
+        year: (s.first_air_date || '').substr(0, 4),
+        poster: TMDBService.getPosterUrl(s.poster_path)
+      }));
+    }
+    State.searchResults = results;
+    hideLoading();
+    renderPosterGrid(results);
+  } catch {
+    hideLoading();
+    renderPosterGrid([]);
+  }
+}
+
+function initSearch() {
+  document.getElementById('searchBtn').onclick = performSearch;
+  document.getElementById('searchInput').onkeypress = e => e.key === 'Enter' && performSearch();
+}
+
+function showModalLayer() {
+  document.getElementById('modalLayer').classList.add('active');
+}
+
+function hideModalLayer() {
+  document.getElementById('modalLayer').classList.remove('active');
+  closePosterModal();
+  closeReviewModal();
+  State.customPoster = null;
+}
+
+function showPosterModal() {
+  showModalLayer();
+  document.getElementById('posterModal').classList.add('active');
+  const titles = { movie: '选择电影', tv: '选择剧集', book: '选择书籍' };
+  document.getElementById('posterModalTitle').textContent = titles[State.currentType];
+}
+
+function closePosterModal() {
+  document.getElementById('posterModal').classList.remove('active');
+}
+
+function showLoading() {
+  document.getElementById('posterModal').classList.add('loading');
+}
+
+function hideLoading() {
+  document.getElementById('posterModal').classList.remove('loading');
+}
+
+function openReviewModal(item) {
+  State.selectedItem = item;
+  State.selectedRating = 3;
+  State.customPoster = null;
+
+  const img = document.getElementById('reviewPosterImg');
+  img.src = item.poster || '';
+
+  document.getElementById('reviewItemTitle').value = item.title;
+  document.getElementById('reviewItemYear').value = item.year || '';
+
+  document.getElementById('uploadPosterBtn').innerHTML = `
+    <span class="upload-icon">+</span><span class="upload-text">上传封面</span>
+  `;
+
+  updateStarRating(3);
+  document.getElementById('reviewTextarea').value = '';
+
+  closePosterModal();
+  document.getElementById('reviewModal').classList.add('active');
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.remove('active');
+  State.selectedItem = null;
+}
+
+let currentDetailRecord = null;
+
+function openDetailModal(record) {
+  currentDetailRecord = record;
+
+  const poster = document.getElementById('detailPosterImg');
+  poster.src = record.poster || '';
+
+  document.getElementById('detailTitle').textContent = record.title;
+  document.getElementById('detailMeta').textContent = [
+    record.type === 'book' ? '书籍' : record.type === 'tv' ? '剧集' : '电影',
+    record.year || '',
+    record.date
+  ].filter(Boolean).join(' · ');
+
+  const ratingEl = document.getElementById('detailRating');
+  const fullStars = '<span>★</span>'.repeat(record.rating);
+  const emptyStars = '<span class="empty">★</span>'.repeat(5 - record.rating);
+  ratingEl.innerHTML = fullStars + emptyStars;
+
+  const commentEl = document.getElementById('detailComment');
+  commentEl.textContent = record.comment || '此人尚未留下隻字片語。';
+
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('active');
+  currentDetailRecord = null;
+}
+
+function editRecord() {
+  if (!currentDetailRecord) return;
+
+  State.selectedItem = {
+    type: currentDetailRecord.type,
+    title: currentDetailRecord.title,
+    year: currentDetailRecord.year,
+    poster: currentDetailRecord.poster
+  };
+  State.selectedRating = currentDetailRecord.rating;
+  State.customPoster = null;
+  State.editingId = currentDetailRecord.id;
+
+  document.getElementById('reviewPosterImg').src = currentDetailRecord.poster || '';
+  document.getElementById('reviewItemTitle').value = currentDetailRecord.title;
+  document.getElementById('reviewItemYear').value = currentDetailRecord.year || '';
+  updateStarRating(currentDetailRecord.rating);
+  document.getElementById('reviewTextarea').value = currentDetailRecord.comment || '';
+
+  closeDetailModal();
+  closeLibraryModal();
+  showModalLayer();
+  document.getElementById('reviewModal').classList.add('active');
+}
+
+function deleteRecord() {
+  if (!currentDetailRecord) return;
+
+  if (confirm('确定要删除这条记录吗？')) {
+    const records = Storage.getRecords().filter(r => r.id !== currentDetailRecord.id);
+    Storage.saveRecords(records);
+    closeDetailModal();
+    closeLibraryModal();
+    updateLibraryCount();
+    setTimeout(openLibraryModal, 100);
+  }
+}
+
+async function exportCard() {
+  if (!currentDetailRecord) return;
+
+  const record = currentDetailRecord;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 600;
+  canvas.height = 400;
+
+  ctx.fillStyle = '#121212';
+  ctx.fillRect(0, 0, 600, 400);
+
+  for (let i = 0; i < 8000; i++) {
+    const x = Math.random() * 600;
+    const y = Math.random() * 400;
+    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.02})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+
+  ctx.strokeStyle = 'rgba(201, 168, 124, 0.3)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(20, 20, 560, 360);
+
+  if (record.poster) {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = record.poster;
+      });
+      ctx.drawImage(img, 40, 40, 160, 240);
+    } catch {
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(40, 40, 160, 240);
+    }
+  }
+
+  ctx.fillStyle = '#C9A87C';
+  ctx.font = 'bold 24px serif';
+  const title = record.title.length > 12 ? record.title.substring(0, 12) + '...' : record.title;
+  ctx.fillText(title, 220, 80);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '14px serif';
+  const typeText = record.type === 'book' ? '书籍' : record.type === 'tv' ? '剧集' : '电影';
+  ctx.fillText(`${typeText} · ${record.year || ''}`, 220, 110);
+
+  ctx.fillStyle = '#C9A87C';
+  ctx.font = '18px serif';
+  ctx.fillText('★'.repeat(record.rating) + '☆'.repeat(5 - record.rating), 220, 145);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '12px serif';
+  ctx.fillText(record.date, 220, 170);
+
+  ctx.strokeStyle = 'rgba(201, 168, 124, 0.2)';
+  ctx.beginPath();
+  ctx.moveTo(220, 190);
+  ctx.lineTo(560, 190);
+  ctx.stroke();
+
+  if (record.comment) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '14px serif';
+    const maxWidth = 320;
+    const lineHeight = 22;
+    const lines = wrapText(ctx, record.comment, maxWidth);
+
+    lines.forEach((line, i) => {
+      if (i < 6) {
+        ctx.fillText(line, 220, 220 + i * lineHeight);
+      }
+    });
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = 'italic 14px serif';
+    ctx.fillText('此人尚未留下隻字片語。', 220, 220);
+  }
+
+  ctx.fillStyle = 'rgba(201, 168, 124, 0.5)';
+  ctx.font = '10px serif';
+  ctx.fillText('MOON DUST', 40, 370);
+
+  const link = document.createElement('a');
+  link.download = `${record.title}_${record.date}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split('');
+  const lines = [];
+  let currentLine = '';
+
+  words.forEach(char => {
+    const testLine = currentLine + char;
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = char;
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+function exportAllCards() {
+  const records = Storage.getRecords();
+  if (records.length === 0) {
+    alert('暂无记录可导出');
+    return;
+  }
+
+  const cardWidth = 600;
+  const cardHeight = 400;
+  const cols = 2;
+  const rows = Math.ceil(records.length / cols);
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = cols * cardWidth;
+  canvas.height = rows * cardHeight;
+
+  ctx.fillStyle = '#121212';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let loadedCount = 0;
+  records.forEach((record, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    const x = col * cardWidth;
+    const y = row * cardHeight;
+
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x + 10, y + 10, cardWidth - 20, cardHeight - 20);
+    ctx.strokeStyle = 'rgba(201, 168, 124, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 10, y + 10, cardWidth - 20, cardHeight - 20);
+
+    if (record.poster) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx.drawImage(img, x + 30, y + 30, 120, 180);
+        drawCardText(ctx, record, x, y);
+        loadedCount++;
+        if (loadedCount === records.length) {
+          downloadCanvas(canvas);
+        }
+      };
+      img.onerror = () => {
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fillRect(x + 30, y + 30, 120, 180);
+        drawCardText(ctx, record, x, y);
+        loadedCount++;
+        if (loadedCount === records.length) {
+          downloadCanvas(canvas);
+        }
+      };
+      img.src = record.poster;
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(x + 30, y + 30, 120, 180);
+      drawCardText(ctx, record, x, y);
+      loadedCount++;
+      if (loadedCount === records.length) {
+        downloadCanvas(canvas);
+      }
+    }
+  });
+
+  function drawCardText(ctx, record, x, y) {
+    ctx.fillStyle = '#C9A87C';
+    ctx.font = 'bold 18px serif';
+    const title = record.title.length > 14 ? record.title.substring(0, 14) + '...' : record.title;
+    ctx.fillText(title, x + 170, y + 60);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '12px serif';
+    const typeText = record.type === 'book' ? '书籍' : record.type === 'tv' ? '剧集' : '电影';
+    ctx.fillText(`${typeText} · ${record.year || ''}`, x + 170, y + 85);
+
+    ctx.fillStyle = '#C9A87C';
+    ctx.font = '14px serif';
+    ctx.fillText('★'.repeat(record.rating) + '☆'.repeat(5 - record.rating), x + 170, y + 110);
+
+    if (record.comment) {
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '12px serif';
+      const comment = record.comment.length > 60 ? record.comment.substring(0, 60) + '...' : record.comment;
+      ctx.fillText(comment, x + 170, y + 140);
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = 'italic 12px serif';
+      ctx.fillText('此人尚未留下隻字片語。', x + 170, y + 140);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '10px serif';
+    ctx.fillText(record.date, x + 170, y + 160);
+
+    ctx.fillStyle = 'rgba(201, 168, 124, 0.5)';
+    ctx.font = '8px serif';
+    ctx.fillText('MOON DUST', x + 30, y + 220);
+  }
+
+  function downloadCanvas(canvas) {
+    const link = document.createElement('a');
+    link.download = `moondust_records_${new Date().toISOString().split('T')[0]}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+}
+
+function initModalCloseEvents() {
+  document.getElementById('posterModalClose').onclick = hideModalLayer;
+  document.getElementById('reviewModalClose').onclick = hideModalLayer;
+  document.getElementById('libraryModalClose').onclick = closeLibraryModal;
+  document.getElementById('detailModalClose').onclick = closeDetailModal;
+  document.getElementById('editRecordBtn').onclick = editRecord;
+  document.getElementById('exportCardBtn').onclick = exportCard;
+  document.getElementById('deleteRecordBtn').onclick = deleteRecord;
+  document.getElementById('exportBtn').onclick = exportAllCards;
+  document.getElementById('modalOverlay').onclick = () => {
+    if (!document.getElementById('libraryModal').classList.contains('active') &&
+        !document.getElementById('detailModal').classList.contains('active')) {
+      hideModalLayer();
+    }
+  };
+  document.onkeydown = e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('detailModal').classList.contains('active')) {
+        closeDetailModal();
+      } else if (document.getElementById('libraryModal').classList.contains('active')) {
+        closeLibraryModal();
+      } else {
+        hideModalLayer();
+      }
+    }
+  };
+}
+
+function renderPosterGrid(results) {
+  const grid = document.getElementById('posterGrid');
+
+  if (results.length === 0) {
+    grid.innerHTML = '<div class="poster-empty" style="text-align:center;padding:40px;font-size:13px;color:rgba(255,255,255,0.4)">未找到结果，请尝试其他关键词</div>';
+    return;
+  }
+
+  grid.innerHTML = results.map((item, i) => `
+    <div class="poster-item" data-index="${i}">
+      ${item.poster
+        ? `<img src="${item.poster}" alt="${item.title}" class="poster-item-img" loading="lazy">`
+        : `<div class="poster-placeholder">No</div>`
+      }
+      <div class="poster-item-info">
+        <p class="poster-item-title">${item.title}</p>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.poster-item').forEach(el => {
+    el.onclick = () => {
+      const idx = parseInt(el.dataset.index);
+      openReviewModal(results[idx]);
+    };
+  });
+}
+
+function updateStarRating(rating) {
+  State.selectedRating = rating;
+  document.querySelectorAll('#reviewRating .star').forEach((s, i) => {
+    s.classList.toggle('active', i < rating);
+  });
+}
+
+function initStarRating() {
+  document.querySelectorAll('#reviewRating .star').forEach(star => {
+    star.onclick = () => updateStarRating(parseInt(star.dataset.rating));
+    star.onmouseenter = () => {
+      const r = parseInt(star.dataset.rating);
+      document.querySelectorAll('#reviewRating .star').forEach((s, i) => {
+        s.style.color = i < r ? 'var(--accent)' : 'rgba(255,255,255,0.2)';
+      });
+    };
+  });
+  document.getElementById('reviewRating').onmouseleave = () => updateStarRating(State.selectedRating);
+}
+
+function initPosterUpload() {
+  document.getElementById('posterUploadInput').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      State.customPoster = ev.target.result;
+      document.getElementById('reviewPosterImg').src = State.customPoster;
+      document.getElementById('uploadPosterBtn').innerHTML = '<span class="upload-icon">✓</span><span class="upload-text">已上传</span>';
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+function initUploadOwn() {
+  document.getElementById('uploadOwnBtn').onclick = () => {
+    State.selectedItem = { type: State.currentType, title: '', year: '' };
+    State.selectedRating = 3;
+    State.customPoster = null;
+
+    document.getElementById('reviewPosterImg').src = '';
+    document.getElementById('reviewItemTitle').value = '';
+    document.getElementById('reviewItemYear').value = '';
+    document.getElementById('uploadPosterBtn').innerHTML = '<span class="upload-icon">+</span><span class="upload-text">上传封面</span>';
+    updateStarRating(3);
+    document.getElementById('reviewTextarea').value = '';
+
+    closePosterModal();
+    document.getElementById('reviewModal').classList.add('active');
+  };
+}
+
+function saveRecord(withComment) {
+  const title = document.getElementById('reviewItemTitle').value.trim() || '未知作品';
+  const year = document.getElementById('reviewItemYear').value.trim() || '';
+  const poster = State.customPoster || State.selectedItem?.poster || '';
+
+  if (State.editingId) {
+    const records = Storage.getRecords();
+    const idx = records.findIndex(r => r.id === State.editingId);
+    if (idx !== -1) {
+      records[idx] = {
+        ...records[idx],
+        title, year, poster,
+        rating: State.selectedRating,
+        comment: withComment ? document.getElementById('reviewTextarea').value.trim() : records[idx].comment,
+        updatedAt: Date.now()
+      };
+      Storage.saveRecords(records);
+    }
+    State.editingId = null;
+  } else {
+    const record = {
+      id: Storage.generateId(),
+      type: State.selectedItem?.type || State.currentType,
+      title, year, poster,
+      date: new Date().toISOString().split('T')[0],
+      rating: State.selectedRating,
+      comment: withComment ? document.getElementById('reviewTextarea').value.trim() : '',
+      createdAt: Date.now()
+    };
+    Storage.addRecord(record);
+  }
+
+  hideModalLayer();
+  document.getElementById('searchInput').value = '';
+  updateLibraryCount();
+}
+
+function initReviewActions() {
+  document.getElementById('abandonBtn').onclick = hideModalLayer;
+  document.getElementById('saveLaterBtn').onclick = () => saveRecord(false);
+  document.getElementById('saveNowBtn').onclick = () => saveRecord(true);
+}
+
+function openLibraryModal() {
+  showModalLayer();
+  document.getElementById('libraryModal').classList.add('active');
+  renderLibrary();
+}
+
+function closeLibraryModal() {
+  document.getElementById('libraryModal').classList.remove('active');
+  document.getElementById('modalLayer').classList.remove('active');
+}
+
+function initLibraryButton() {
+  document.getElementById('openLibraryBtn').onclick = openLibraryModal;
+}
+
+function updateLibraryCount() {
+  const count = Storage.getRecords().length;
+  document.getElementById('libraryCount').textContent = count;
+}
+
+function initViewToggle() {
+  const btn = document.getElementById('viewToggleBtn');
+  btn.onclick = () => {
+    State.viewMode = State.viewMode === 'grid' ? 'list' : 'grid';
+    localStorage.setItem('moondust_view', State.viewMode);
+    document.body.dataset.view = State.viewMode;
+    btn.querySelector('.view-icon').textContent = State.viewMode === 'grid' ? '⊞' : '☰';
+    if (document.getElementById('libraryModal').classList.contains('active')) {
+      renderLibrary();
+    }
+  };
+  btn.querySelector('.view-icon').textContent = State.viewMode === 'grid' ? '⊞' : '☰';
+}
+
+function initParticleToggle() {
+  const btn = document.getElementById('particleToggleBtn');
+  btn.onclick = () => {
+    State.particleEnabled = !State.particleEnabled;
+    localStorage.setItem('moondust_particle', State.particleEnabled);
+    document.body.dataset.particle = State.particleEnabled;
+    btn.classList.toggle('active', State.particleEnabled);
+  };
+  btn.classList.toggle('active', State.particleEnabled);
+}
+
+function groupRecords(records) {
+  const monthMap = {};
+
+  records.forEach(r => {
+    const d = new Date(r.date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if (!monthMap[key]) {
+      monthMap[key] = { year: d.getFullYear(), month: d.getMonth(), items: [] };
+    }
+    monthMap[key].items.push(r);
+  });
+
+  const sorted = Object.values(monthMap).sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.month - a.month;
+  });
+
+  const groups = [];
+  let buffer = [];
+
+  sorted.forEach(g => {
+    if (g.items.length >= 3) {
+      if (buffer.length > 0) {
+        groups.push(...mergeToSeasons(buffer));
+        buffer = [];
+      }
+      groups.push({
+        label: `${getMonthName(g.month)} ${g.year}`,
+        items: g.items
+      });
+    } else {
+      buffer.push(g);
+    }
+  });
+
+  if (buffer.length > 0) {
+    groups.push(...mergeToSeasons(buffer));
+  }
+
+  return groups;
+}
+
+function mergeToSeasons(monthGroups) {
+  if (monthGroups.length === 0) return [];
+
+  const seasonMap = {};
+  monthGroups.forEach(g => {
+    const season = getSeason(new Date(g.year, g.month));
+    if (!seasonMap[season]) {
+      seasonMap[season] = { season, year: g.year, items: [] };
+    }
+    seasonMap[season].items.push(...g.items);
+  });
+
+  return Object.values(seasonMap).map(s => ({
+    label: `${getSeasonName(s.season)} ${s.year}`,
+    items: s.items
+  }));
+}
+
+function renderLibrary() {
+  const records = Storage.getRecords();
+  const body = document.getElementById('libraryModalBody');
+  const count = document.getElementById('libraryRecordCount');
+
+  count.textContent = `${records.length} 条记录`;
+
+  if (records.length === 0) {
+    body.innerHTML = `
+      <div class="library-empty">
+        <div class="library-empty-icon">◇</div>
+        <p class="library-empty-text">尚未记录任何内容</p>
+      </div>
+    `;
+    return;
+  }
+
+  const groups = groupRecords(records);
+  const season = getSeason();
+
+  body.innerHTML = groups.map(group => `
+    <div class="library-group" data-season="${season}">
+      <h4 class="library-group-title">${group.label}</h4>
+      <div class="library-records-${State.viewMode}">
+        ${group.items.map(r => renderRecordCard(r)).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  body.querySelectorAll('.library-record').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const record = Storage.getRecords().find(r => r.id === id);
+      if (record) openDetailModal(record);
+    };
+  });
+
+  if (State.particleEnabled) {
+    body.querySelectorAll('.record-particle-wrapper').forEach(el => {
+      const canvas = el.querySelector('.record-particle-canvas');
+      const comment = el.querySelector('.record-comment');
+      if (canvas && comment) {
+        initParticleForRecord(canvas, comment);
+      }
+    });
+  }
+}
+
+function renderRecordCard(record) {
+  const poster = record.poster
+    ? `<img src="${record.poster}" alt="${record.title}" class="library-record-poster" loading="lazy">`
+    : `<div class="library-record-poster" style="display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);font-size:10px;color:rgba(255,255,255,0.3)">无封面</div>`;
+
+  const rating = '<span>★</span>'.repeat(record.rating) + '<span class="empty">★</span>'.repeat(5 - record.rating);
+  const comment = record.comment || '此人尚未留下隻字片語。';
+
+  if (State.viewMode === 'grid') {
+    return `
+      <div class="library-record library-record-grid" data-id="${record.id}">
+        ${poster}
+        <div class="library-record-info" style="padding:8px">
+          <p class="library-record-title">${record.title}</p>
+          <p class="library-record-meta">${record.year || ''}</p>
+        </div>
+        <div class="record-particle-wrapper" style="height:60px">
+          <div class="record-comment">${comment}</div>
+          <canvas class="record-particle-canvas"></canvas>
+          <div class="record-particle-bg"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="library-record library-record-list" data-id="${record.id}">
+      ${poster}
+      <div class="library-record-info">
+        <p class="library-record-title">${record.title}</p>
+        <p class="library-record-meta">${record.type === 'book' ? '书籍' : record.type === 'tv' ? '剧集' : '电影'} · ${record.year || ''}</p>
+        <div class="library-record-rating">${rating}</div>
+        <div class="record-particle-wrapper" style="margin-top:8px">
+          <div class="record-comment ${record.comment ? '' : 'empty'}">${comment}</div>
+          <canvas class="record-particle-canvas"></canvas>
+          <div class="record-particle-bg"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+const particleInstances = new Map();
+
+function initParticleForRecord(canvas, commentEl) {
+  if (particleInstances.has(canvas)) return;
+
+  const wrapper = canvas.parentElement;
+  const width = wrapper.offsetWidth;
+  const height = wrapper.offsetHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const area = width * height;
+  const count = Math.floor((area / 8000) * CONFIG.PARTICLE_DENSITY);
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      baseX: 0, baseY: 0,
+      vx: 0, vy: 0,
+      size: Math.random() * CONFIG.PARTICLE_SIZE + 0.5,
+      opacity: Math.random() * 0.25 + 0.05
+    });
+    particles[i].baseX = particles[i].x;
+    particles[i].baseY = particles[i].y;
+  }
+
+  let isRevealed = false;
+  let exploding = false;
+  let gathering = false;
+
+  const ctx = canvas.getContext('2d');
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+
+    if (!isRevealed) {
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.97)';
+      ctx.fillRect(0, 0, width, height);
+
+      particles.forEach(p => {
+        if (!gathering) {
+          p.vx += (Math.random() - 0.5) * 0.08;
+          p.vy += (Math.random() - 0.5) * 0.08;
+          p.vx *= 0.96;
+          p.vy *= 0.96;
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 2) p.vx += 0.1;
+          if (p.x > width - 2) p.vx -= 0.1;
+          if (p.y < 2) p.vy += 0.1;
+          if (p.y > height - 2) p.vy -= 0.1;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201, 168, 124, ${p.opacity})`;
+        ctx.fill();
+      });
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  function explode() {
+    if (exploding || isRevealed) return;
+    exploding = true;
+
+    particles.forEach(p => {
+      const dx = p.x - width / 2;
+      const dy = p.y - height / 2;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const speed = 6 + Math.random() * 10;
+      p.vx = (dx / dist) * speed;
+      p.vy = (dy / dist) * speed;
+    });
+
+    setTimeout(() => {
+      isRevealed = true;
+      exploding = false;
+    }, 600);
+  }
+
+  function gather() {
+    if (gathering || !isRevealed) return;
+    gathering = true;
+
+    particles.forEach(p => {
+      p.vx = (p.baseX - p.x) * 0.15;
+      p.vy = (p.baseY - p.y) * 0.15;
+      p.opacity = 0;
+    });
+
+    const animate = () => {
+      let done = true;
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.88;
+        p.vy *= 0.88;
+        if (Math.abs(p.baseX - p.x) > 1 || Math.abs(p.baseY - p.y) > 1) done = false;
+        p.opacity = Math.min(0.3, p.opacity + 0.03);
+      });
+      if (!done) requestAnimationFrame(animate);
+      else {
+        gathering = false;
+        isRevealed = false;
+      }
+    };
+    animate();
+  }
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (isRevealed) {
+      gather();
+    } else {
+      explode();
+    }
+  };
+
+  canvas.addEventListener('click', handleClick);
+  canvas.addEventListener('touchend', handleClick);
+
+  particleInstances.set(canvas, { explode, gather });
+}
+
+function displayRandomQuote() {
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  const qEl = document.getElementById('mainQuote');
+  const aEl = document.getElementById('quoteAuthor');
+
+  qEl.style.opacity = '0';
+  aEl.style.opacity = '0';
+
+  setTimeout(() => {
+    qEl.textContent = `"${q.text}"`;
+    aEl.textContent = `— ${q.author}`;
+    qEl.style.transition = 'opacity 1.5s ease';
+    aEl.style.transition = 'opacity 1.5s ease 0.3s';
+    qEl.style.opacity = '1';
+    aEl.style.opacity = '0.6';
+  }, 100);
+}
+  </script>
+</body>
+</html>
