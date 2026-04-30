@@ -1,0 +1,19 @@
+# Source files
+src/
+js/
+
+# Build artifacts
+node_modules/
+*.zip
+
+# Development files
+moondust-release/
+
+# Documentation
+DEPLOYMENT.md
+TENCENT_DEPLOY.md
+deploy-tencent.sh
+
+# IDE & OS
+.vscode/
+.DS_Store
