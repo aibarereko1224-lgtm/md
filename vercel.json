@@ -1,8 +1,16 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "routes": [
-    { "src": "/(.*)", "dest": "/", "headers": { "Cache-Control": "no-cache" } }
+  "rewrites": [
+    { "source": "/", "destination": "/moondust.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
   ]
 }

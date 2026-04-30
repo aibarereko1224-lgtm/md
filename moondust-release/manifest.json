@@ -1,0 +1,19 @@
+{
+  "name": "Moon Dust 月岩尘",
+  "short_name": "Moon Dust",
+  "description": "一个诗意的影音阅读记录应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23121212' width='512' height='512' rx='80'/><text x='50%25' y='55%25' text-anchor='middle' dy='.3em' font-size='280' fill='%23C9A87C'>◇</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"]
+}
