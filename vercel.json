@@ -1,4 +1,8 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/moondust.html"
+    }
+  ]
 }
