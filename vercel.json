@@ -1,11 +1,8 @@
 {
-  "buildCommand": null,
-  "outputDirectory": "public",
-  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/api/tmdb/:path*",
+      "destination": "https://api.themoviedb.org/3/:path*"
     }
   ]
 }

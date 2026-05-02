@@ -10,7 +10,7 @@ const CONFIG = {
   VIEW_MODE_KEY: 'moondust_view',
   PARTICLE_KEY: 'moondust_particle',
 
-  TMDB_BASE_URL: 'https://api.themoviedb.org/3',
+  TMDB_BASE_URL: '/api/tmdb',
   TMDB_IMAGE_BASE: 'https://image.tmdb.org/t/p/w500',
   GOOGLE_BOOKS_URL: 'https://www.googleapis.com/books/v1/volumes',
 
