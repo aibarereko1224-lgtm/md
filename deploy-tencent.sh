@@ -56,7 +56,7 @@ if [ $? -eq 0 ]; then
     echo "✨ 部署成功！"
     echo ""
     echo "🌐 访问地址："
-    echo "   https://${ENV_ID}.tcloudbaseapp.com/moondust.html"
+    echo "   https://${ENV_ID}.tcloudbaseapp.com/index.html"
     echo ""
     echo "📱 也可以访问："
     echo "   https://${ENV_ID}.tcloudbaseapp.com/"

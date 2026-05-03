@@ -5,7 +5,7 @@ const RUNTIME_CACHE = 'moondust-runtime';
 // 需要缓存的核心资源
 const CORE_ASSETS = [
   '/',
-  '/moondust.html',
+  '/index.html',
   '/index.html',
   '/manifest.json'
 ];

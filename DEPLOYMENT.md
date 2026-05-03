@@ -54,7 +54,7 @@ git push -u origin main
 ### 3. 上传文件
 ```bash
 # 使用 ossutil 工具上传
-ossutil cp moondust.html oss://你的bucket名/
+ossutil cp index.html oss://你的bucket名/
 ossutil cp index.html oss://你的bucket名/
 ossutil cp manifest.json oss://你的bucket名/
 ossutil cp sw.js oss://你的bucket名/

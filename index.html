@@ -1654,16 +1654,13 @@ const CONFIG = {
   DOUBAN_SEARCH_URL: 'https://movie.douban.com/j/subject_suggest',
   DOUBAN_BOOK_SEARCH_URL: 'https://search.douban.com/book/subject_search',
 
-  // TMDB API（备用，国外）
+ // TMDB API（已打通 Vercel 专属隧道，国内直连秒开）
   TMDB_API_KEY: '926f2381b83c386e92035f2940e15540',
-  TMDB_BASE_URL: 'https://api.themoviedb.org/3',
-  TMDB_IMAGE_BASE: 'https://image.tmdb.org/t/p/w500',
+  TMDB_BASE_URL: '/api/tmdb',
+  TMDB_IMAGE_BASE: '/api/image',
 
-  // Google Books API（备用，国外）
-  GOOGLE_BOOKS_URL: 'https://www.googleapis.com/books/v1/volumes',
-
-  // 优先使用豆瓣（国内快，但可能被反爬拦截）
-  USE_DOUBAN_FIRST: false,  // 改为 false，使用稳定的 TMDB
+  // Google Books API（已打通 Vercel 专属隧道）
+  GOOGLE_BOOKS_URL: '/api/books',
 
   STORAGE_KEY: 'moondust_records',
   PARTICLE_DENSITY: 150,

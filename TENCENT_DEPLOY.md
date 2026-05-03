@@ -34,9 +34,7 @@
 ### 第 3 步：上传文件
 
 1. 点击**上传文件**按钮
-2. 将以下 4 个文件拖拽进来：
-   ```
-   ✅ moondust.html
+2. 将以下 3 个文件拖拽进来：
    ✅ index.html
    ✅ manifest.json
    ✅ sw.js
@@ -50,7 +48,7 @@
 2. 找到**默认域名**（类似 `moondust-xxx.tcloudbaseapp.com`）
 3. 在浏览器打开：
    ```
-   https://你的环境ID.tcloudbaseapp.com/moondust.html
+   https://你的环境ID.tcloudbaseapp.com/index.html
    ```
 
 🎉 **部署完成！**
@@ -141,7 +139,7 @@ cloudbase hosting deploy ./ -e 你的环境ID
 
 部署成功后会显示访问地址：
 ```
-https://你的环境ID.tcloudbaseapp.com/moondust.html
+https://你的环境ID.tcloudbaseapp.com/index.html
 ```
 
 ---
