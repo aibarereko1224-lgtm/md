@@ -6,13 +6,13 @@
 // 配置
 // ============================================
 const CONFIG = {
-  STORAGE_KEY: 'moondust_records',
+ STORAGE_KEY: 'moondust_records',
   VIEW_MODE_KEY: 'moondust_view',
   PARTICLE_KEY: 'moondust_particle',
 
   TMDB_BASE_URL: '/api/tmdb',
-  TMDB_IMAGE_BASE: 'https://image.tmdb.org/t/p/w500',
-  GOOGLE_BOOKS_URL: 'https://www.googleapis.com/books/v1/volumes',
+  TMDB_IMAGE_BASE: '/api/image',
+  GOOGLE_BOOKS_URL: '/api/books',
 
   PARTICLE_DENSITY: 150,
   PARTICLE_SIZE: 1.2,

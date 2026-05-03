@@ -3,6 +3,14 @@
     {
       "source": "/api/tmdb/:path*",
       "destination": "https://api.themoviedb.org/3/:path*"
+    },
+    {
+      "source": "/api/image/:path*",
+      "destination": "https://image.tmdb.org/t/p/w500/:path*"
+    },
+    {
+      "source": "/api/books/:path*",
+      "destination": "https://www.googleapis.com/books/v1/volumes/:path*"
     }
   ]
 }
