@@ -2138,9 +2138,12 @@ function openReviewModal(item) {
   document.getElementById('reviewItemTitle').value = item.title;
   document.getElementById('reviewItemYear').value = item.year || '';
 
-  document.getElementById('uploadPosterBtn').innerHTML = `
-    <span class="upload-icon">+</span><span class="upload-text">上传封面</span>
-  `;
+  // 重置上传按钮文本，但保留 input 元素
+  const uploadBtn = document.getElementById('uploadPosterBtn');
+  const uploadIcon = uploadBtn.querySelector('.upload-icon');
+  const uploadText = uploadBtn.querySelector('.upload-text');
+  if (uploadIcon) uploadIcon.textContent = '+';
+  if (uploadText) uploadText.textContent = '上传封面';
 
   updateStarRating(3);
   document.getElementById('reviewTextarea').value = '';
@@ -2899,7 +2902,12 @@ function initPosterUpload() {
     reader.onload = ev => {
       State.customPoster = ev.target.result;
       document.getElementById('reviewPosterImg').src = State.customPoster;
-      document.getElementById('uploadPosterBtn').innerHTML = '<span class="upload-icon">✓</span><span class="upload-text">已上传</span>';
+      // 更新按钮文本，但保留 input 元素
+      const uploadBtn = document.getElementById('uploadPosterBtn');
+      const uploadIcon = uploadBtn.querySelector('.upload-icon');
+      const uploadText = uploadBtn.querySelector('.upload-text');
+      if (uploadIcon) uploadIcon.textContent = '✓';
+      if (uploadText) uploadText.textContent = '已上传';
     };
     reader.readAsDataURL(file);
   };
@@ -2914,7 +2922,12 @@ function initUploadOwn() {
     document.getElementById('reviewPosterImg').src = '';
     document.getElementById('reviewItemTitle').value = '';
     document.getElementById('reviewItemYear').value = '';
-    document.getElementById('uploadPosterBtn').innerHTML = '<span class="upload-icon">+</span><span class="upload-text">上传封面</span>';
+    // 重置上传按钮文本，但保留 input 元素
+    const uploadBtn = document.getElementById('uploadPosterBtn');
+    const uploadIcon = uploadBtn.querySelector('.upload-icon');
+    const uploadText = uploadBtn.querySelector('.upload-text');
+    if (uploadIcon) uploadIcon.textContent = '+';
+    if (uploadText) uploadText.textContent = '上传封面';
     updateStarRating(3);
     document.getElementById('reviewTextarea').value = '';
 
