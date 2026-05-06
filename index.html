@@ -2509,13 +2509,14 @@ async function exportCard() {
   if (record.comment) {
     ctx.fillStyle = '#5a5045';
     ctx.font = '13px serif';
-    const maxWidth = 300;
+    const maxWidth = 260; // 修正宽度，避免超出边界
     const lineHeight = 24; // 对齐横线
     const lines = wrapText(ctx, record.comment, maxWidth);
 
     lines.forEach((line, i) => {
       if (i < 6) {
-        ctx.fillText(line, paperX + 240, paperY + 170 + i * lineHeight);
+        const isLastLine = (i === lines.length - 1) || (i === 5);
+        fillTextJustify(ctx, line, paperX + 240, paperY + 170 + i * lineHeight, maxWidth, isLastLine);
       }
     });
   } else {
@@ -2548,26 +2549,72 @@ async function exportCard() {
 }
 
 function wrapText(ctx, text, maxWidth) {
-  const words = text.split('');
+  // 按段落分割（处理换行符）
+  const paragraphs = text.split('\n');
   const lines = [];
-  let currentLine = '';
 
-  words.forEach(char => {
-    const testLine = currentLine + char;
-    const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxWidth && currentLine) {
+  paragraphs.forEach((paragraph, pIndex) => {
+    if (paragraph.trim() === '') {
+      // 空段落保留为空行
+      lines.push('');
+      return;
+    }
+
+    const chars = paragraph.split('');
+    let currentLine = '';
+
+    chars.forEach(char => {
+      const testLine = currentLine + char;
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) {
       lines.push(currentLine);
-      currentLine = char;
-    } else {
-      currentLine = testLine;
     }
   });
 
-  if (currentLine) {
-    lines.push(currentLine);
+  return lines;
+}
+
+// 两端对齐绘制文字
+function fillTextJustify(ctx, text, x, y, maxWidth, isLastLine) {
+  const textWidth = ctx.measureText(text).width;
+
+  // 空行或最后一行，左对齐
+  if (!text.trim() || isLastLine || textWidth >= maxWidth * 0.95) {
+    ctx.fillText(text, x, y);
+    return;
   }
 
-  return lines;
+  // 计算需要分配的额外空间
+  const extraSpace = maxWidth - textWidth;
+  const chars = text.split('');
+  const gaps = chars.length - 1;
+
+  if (gaps <= 0) {
+    ctx.fillText(text, x, y);
+    return;
+  }
+
+  // 每个间隙的额外空间
+  const spacePerGap = extraSpace / gaps;
+
+  // 逐字符绘制
+  let currentX = x;
+  chars.forEach((char, i) => {
+    ctx.fillText(char, currentX, y);
+    const charWidth = ctx.measureText(char).width;
+    currentX += charWidth;
+    if (i < gaps) {
+      currentX += spacePerGap;
+    }
+  });
 }
 
 // ✨ 优化后的批量导出 - 使用 async/await 和进度提示
@@ -2788,7 +2835,8 @@ async function exportAllCards() {
 
       lines.forEach((line, i) => {
         if (i < 5) {
-          ctx.fillText(line, paperX + 170, paperY + 140 + i * lineHeight);
+          const isLastLine = (i === lines.length - 1) || (i === 4);
+          fillTextJustify(ctx, line, paperX + 170, paperY + 140 + i * lineHeight, maxWidth, isLastLine);
         }
       });
     } else {
